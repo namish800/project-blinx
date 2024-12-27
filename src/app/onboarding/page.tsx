@@ -1,5 +1,5 @@
 "use client"
-import { useState, FormEvent, useEffect, useRef } from 'react'
+import { useState, FormEvent, useEffect, useRef, useActionState } from 'react'
 import { ProgressIndicator } from '@/components/progress-indicator'
 import { CreateProfile } from '@/components/create-profile'
 import { CompanyInformation } from '@/components/company-information'
@@ -15,12 +15,10 @@ import {
 import { createProfile } from '@/lib/actions'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
-// import { useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { UserProfileStatus } from '@prisma/client'
 
 export default function OnboardingPage() {
-  // const { data:session, update } = useSession();
-  // const router = useRouter();
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<OnboardingData>({
     profile: {
@@ -87,60 +85,6 @@ export default function OnboardingPage() {
     setStep(prev => Math.max(prev - 1, 1))
   }
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault() 
-    console.log('Form submission initiated', { step, formData })
-
-    if (step === 3) {
-      console.log('Validating Step 3...')
-      if (!validateStep(3)) {
-        console.log('Step 3 validation failed')
-        return
-      }
-      console.log('Step 3 validation passed')
-
-      setLoading(true)
-      setErrors({})
-
-      try {
-        console.log('Attempting to create profile...', formData)
-        await createProfile(formData)
-        console.log('Profile created successfully')
-
-        // console.log('Updating profile status...')
-        // await update({profileStatus: UserProfileStatus.COMPLETE, name: formData.profile.name})
-        // console.log('Profile status updated successfully')
-
-        // console.log('Redirecting to dashboard...')
-        // router.push('/dashboard')
-      } catch (error: any) {
-        console.error('Error in profile creation:', {
-          error,
-          type: error.constructor.name,
-          message: error.message
-        })
-        
-        if (error instanceof z.ZodError) {
-          const formattedErrors = error.errors.reduce((acc, curr) => {
-            const key = curr.path[0] as keyof OnboardingData
-            acc[key] = curr.message
-            return acc
-          }, {} as Partial<Record<keyof OnboardingData, string>>)
-          console.log('Validation errors:', formattedErrors)
-          setErrors(formattedErrors)
-        } else {
-          console.error('Unexpected error:', error)
-          setErrors({ content: 'An unexpected error occurred' })
-        }
-      } finally {
-        console.log('Form submission completed', { loading: false })
-        setLoading(false)
-      }
-    } else {
-      console.log('Form submission ignored - not on step 3', { currentStep: step })
-    }
-  }
-
   // Focus on error summary when errors change
   useEffect(() => {
     if (Object.keys(errors).length > 0 && errorRef.current) {
@@ -204,18 +148,52 @@ export default function OnboardingPage() {
             </Button>
           )}
           {step < 3 ? (
-            <Button type="button" onClick={handleNext}>
+            <button type="button" onClick={handleNext}>
               Next
-            </Button>
+            </button>
           ) : (
-            <form onSubmit={handleSubmit}>
-              <Button type='submit' disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit'}
-              </Button>
-            </form>
+            <OnboardingForm formData={formData} loading={loading} />
           )}
         </div>
       </div>
     </div>
   )
+}
+
+
+export function OnboardingForm({formData, loading}: {formData: OnboardingData, loading: boolean}) {
+  const { data:session, update } = useSession();
+  const router = useRouter();
+  const createProfileWithFormData = createProfile.bind(null, formData)
+  const initialState = {
+    message: '',
+    success: false,
+    formData: formData 
+  }
+  const [state, formAction, isPending] = useActionState(createProfileWithFormData, initialState)
+
+  useEffect(() => {
+    const handleProfileUpdate = async () => {
+    console.log("updating session")
+    console.log("state", state)
+    console.log("isPending", isPending) 
+      if(!isPending) {
+        if (state?.success) {
+          await update({profileStatus: UserProfileStatus.COMPLETE, name: formData.profile.name})
+          console.log("redirecting to dashboard")
+          router.push('/dashboard')
+        }
+      }
+    }
+
+    handleProfileUpdate()
+
+  }, [isPending])
+
+  return (<form action={formAction}>
+              <Button type='submit' disabled={isPending}>
+                {isPending ? 'Submitting...' : 'Submit'}
+              </Button>
+          </form>
+  );
 }

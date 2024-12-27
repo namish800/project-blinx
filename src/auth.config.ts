@@ -1,5 +1,6 @@
 import type { NextAuthConfig }  from 'next-auth';
 import { UserProfileStatus } from '@prisma/client';
+import { NextResponse } from 'next/server'
 
 export const authConfig = {
   pages: {
@@ -24,33 +25,28 @@ export const authConfig = {
 
       return token;
     },
-    async authorized({ auth, request: { nextUrl } }) {
+    async authorized({ auth, request }) {
 
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+      const isOnDashboard = request.nextUrl.pathname.startsWith('/dashboard');
 
       let isOnboarded = auth?.user?.profileStatus === UserProfileStatus.COMPLETE;
 
-      const isOnOnboarding = nextUrl.pathname.startsWith('/onboarding');
+      const isOnOnboarding = request.nextUrl.pathname.startsWith('/onboarding');
 
       if (isOnDashboard) {
         if (!isLoggedIn) return false; // Redirect to login
-        if (!isOnboarded) {
-          return Response.redirect(new URL('/onboarding', nextUrl));
-        }
+        if (!isOnboarded) return NextResponse.redirect(new URL('/onboarding', request.url));
         return true;
       } else if (isOnOnboarding) {
         if (!isLoggedIn) return false; // Redirect to login
-        if (isOnboarded) {
-          return Response.redirect(new URL('/dashboard', nextUrl));
-        }
+        // TODO: if already onboarded, redirect to dashboard
+        if (isOnboarded) return NextResponse.redirect(new URL('/dashboard', request.url)); // Redirect to dashboard
         return true;
-      } else if (isLoggedIn) {
-        if (!isOnboarded) {
-          return Response.redirect(new URL('/onboarding', nextUrl));
-        }
-        return Response.redirect(new URL('/dashboard', nextUrl));
       }
+      // } else if (isLoggedIn) {
+      //   return NextResponse.redirect(new URL('/dashboard', request.url));
+      // }
       return true;
     }
   },

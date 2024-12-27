@@ -9,13 +9,50 @@ import { redirect } from 'next/navigation';
 import { UserProfileStatus } from "@prisma/client";
 
 
+const getCallbackUrl = (url: string) => {
+  try {
+    console.log("URL:", url)
+    const searchParams = new URLSearchParams(new URL(url).search);
+    const encodedCallback = searchParams.get('callbackUrl');
+    console.log("Encoded callback:", encodedCallback)
+    return encodedCallback ? decodeURIComponent(encodedCallback) : '/dashboard';
+  } catch (error) {
+    console.error('Error parsing callback URL:', error);
+    return '/dashboard';
+  }
+}
+
+const isOnboardingComplete = async (email: string | null) => {
+  // Check if the user's profile is complete
+  if(email) {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+      include: { profile: true, company: true, content: true },
+    });
+    console.log("User:", user)
+    return user?.profileStatus === UserProfileStatus.COMPLETE;
+  }
+  return false;
+}
+
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
   try {
     console.log("GOing to sign in")
-    await signIn('credentials', {"email": formData.get("email"), "password": formData.get("password")});
+    const callbackUrl = await signIn('credentials', {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      redirect: false
+    });
+
+    const redirectToCallbackUrl = getCallbackUrl(callbackUrl || '');
+    const email = formData.get("email") as string;
+    console.log("Email:", email)
+    const redirectTo = await isOnboardingComplete(email)? redirectToCallbackUrl : '/onboarding';
+    console.log("Redirecting to:", redirectTo);
+    redirect(redirectTo)
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -30,7 +67,9 @@ export async function authenticate(
 }
 
 export async function signout() {
-    await signOut();
+    console.log("Signing out")
+    await signOut({redirectTo: '/'});
+
 }
 
 
@@ -111,19 +150,19 @@ class DatabaseError extends Error {
  * @throws {DatabaseError} If there's an issue saving data to the database.
  */
 export async function createProfile(formData: OnboardingData) {
-  console.log('Inside create profile action:', formData)
+  console.log("Creating profile with data:", formData)
   // Retrieve the authenticated user's session
   const session = await auth()
 
   // Validate the session
   if (!session || !session.user) {
-    throw new AuthenticationError('User is not authenticated.')
+    return { success: false, message: 'User is not authenticated.' }
   }
 
   const userEmail = session.user.email
 
   if (!userEmail) {
-    throw new AuthenticationError('User email not found in session.')
+    return { success: false, message: 'User email not found in session.' }
   }
 
   // Retrieve the user from the database using their email
@@ -132,14 +171,13 @@ export async function createProfile(formData: OnboardingData) {
   })
 
   if (!user) {
-    throw new AuthenticationError('User not found in the database.')
+    return { success: false, message: 'User not found in the database.' }
   }
-
-  console.log('User found:', user)
-  console.log('Onboarding data:', formData)
 
   // Destructure the formData for easier access
   const { profile, company, content } = formData
+
+  console.log('Creating profile for user:', formData)
 
   try {
     // Use a transaction to ensure all operations succeed or fail together
@@ -199,13 +237,12 @@ export async function createProfile(formData: OnboardingData) {
     const updUser = await prisma.user.findUnique({
       where: { email: userEmail },
     })
-    console.log('User updated:', updUser)
-
     console.log('Onboarding data saved successfully!')
     
 
   } catch (error: any) {
     console.error('Error creating profile:', error)
-    throw new DatabaseError('Failed to save onboarding data.')
+    return { success: false, message: 'Failed to save onboarding data.' }
   }
-}
+  return { success: true , message: 'Profile created successfully'}
+}  
