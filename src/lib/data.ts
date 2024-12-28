@@ -11,7 +11,6 @@ export async function fetchBrandData(id: string): Promise<BrandDTO> {
         {
           id: "1",
           name: "Primary Palette",
-          isDefault: true,
           colors: ["#fd243e", "#1F2937", "#EC4899", "#FFFFFF"]
         }
       ],
@@ -35,7 +34,6 @@ export async function fetchBrandData(id: string): Promise<BrandDTO> {
       ]
     },
     textStyleGuide: {
-      isDefault: true,
       values: [
         {
           id: "1",
