@@ -128,7 +128,7 @@ export function BrandStyle({
               <ColorPalette
                 key={palette.id}
                 {...palette}
-                onDefaultChange={(isDefault) => handleUpdatePalette(palette.id, { isDefault })}
+                onDefaultChange={(id: string, isDefault: boolean) => handleUpdatePalette(id, { isDefault })}
                 onDeletePalette={() => handleDeletePalette(palette.id)}
                 onUpdatePalette={(id, colors) => handleUpdatePalette(id, { colors })}
               />
