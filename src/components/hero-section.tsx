@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PlayCircle } from 'lucide-react'
-import { joinWaitlist } from "@/lib/actions"
+import { joinWaitlist } from "@/lib/actions/actions"
 import { useActionState } from "react"
 // import dynamic from "next/dynamic";
 

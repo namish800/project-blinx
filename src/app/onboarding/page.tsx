@@ -12,7 +12,7 @@ import {
   contentSchema, 
   type OnboardingData 
 } from '@/types/onboarding'
-import { createProfile } from '@/lib/actions'
+import { createProfile } from '@/lib/actions/actions'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react";

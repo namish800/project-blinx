@@ -2,7 +2,7 @@ import { Search, Home, FolderClosed, Layers, Users, Grid, Clock } from 'lucide-r
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PowerIcon } from '@heroicons/react/24/outline';
-import { signout } from '@/lib/actions';
+import { signout } from '@/lib/actions/actions';
 import { auth } from '@/auth';
 import { HubNavLinks, MainNavLinks } from '@/components/nav-links';
 

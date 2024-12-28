@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation';
 import { Search, Home, FolderClosed, Layers, Users, Grid, Clock, Palette, BriefcaseBusiness } from 'lucide-react'
 
 import clsx from 'clsx';
-import { Link } from './ui/link';
+import { Link } from '@/components/ui/link';
 
 
 // Map of links to display in the side navigation.
