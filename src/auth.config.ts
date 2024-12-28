@@ -7,7 +7,7 @@ export const authConfig = {
     signIn: '/login',
   },
   callbacks: {
-    async session({ session, user, token }) {
+    async session({ session, token }) {
       if (token?.profileStatus) {
         session.user.profileStatus = token.profileStatus as UserProfileStatus;
       }
@@ -30,7 +30,7 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = request.nextUrl.pathname.startsWith('/dashboard');
 
-      let isOnboarded = auth?.user?.profileStatus === UserProfileStatus.COMPLETE;
+      const isOnboarded = auth?.user?.profileStatus === UserProfileStatus.COMPLETE;
 
       const isOnOnboarding = request.nextUrl.pathname.startsWith('/onboarding');
 

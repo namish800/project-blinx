@@ -1,4 +1,3 @@
-import { Sidebar } from "@/components/sidebar"
 import { SearchHeader } from "@/components/search-header"
 import { CreateSection } from "@/components/create-section"
 

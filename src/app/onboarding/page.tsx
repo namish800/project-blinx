@@ -1,12 +1,11 @@
 "use client"
-import { useState, FormEvent, useEffect, useRef, useActionState } from 'react'
+import { useState, useEffect, useRef, useActionState } from 'react'
 import { ProgressIndicator } from '@/components/progress-indicator'
 import { CreateProfile } from '@/components/create-profile'
 import { CompanyInformation } from '@/components/company-information'
 import { ContentSelection } from '@/components/content-selection'
 import { Button } from '@/components/ui/button'
 import { 
-  onboardingSchema, 
   profileSchema, 
   companySchema, 
   contentSchema, 
@@ -35,7 +34,6 @@ export default function OnboardingPage() {
     },
   })
   const [errors, setErrors] = useState<Partial<Record<keyof OnboardingData, string>>>({})
-  const [loading, setLoading] = useState(false)
   const errorRef = useRef<HTMLDivElement>(null)
 
   const steps = [
@@ -46,7 +44,7 @@ export default function OnboardingPage() {
 
   const validateStep = (stepNumber: number) => {
     let isValid = false
-    let newErrors: typeof errors = {}
+    const newErrors: typeof errors = {}
 
     try {
       switch (stepNumber) {
@@ -152,7 +150,7 @@ export default function OnboardingPage() {
               Next
             </button>
           ) : (
-            <OnboardingForm formData={formData} loading={loading} />
+            <OnboardingForm formData={formData} />
           )}
         </div>
       </div>
@@ -161,8 +159,8 @@ export default function OnboardingPage() {
 }
 
 
-export function OnboardingForm({formData, loading}: {formData: OnboardingData, loading: boolean}) {
-  const { data:session, update } = useSession();
+export function OnboardingForm({formData}: {formData: OnboardingData}) {
+  const { update } = useSession();
   const router = useRouter();
   const createProfileWithFormData = createProfile.bind(null, formData)
   const initialState = {

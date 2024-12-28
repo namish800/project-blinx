@@ -2,7 +2,6 @@ import { BrandStyle } from "@/components/brand-style"
 import { TextStyleGuide } from "@/components/text-style-guide"
 import { LanguageSelector } from "@/components/language-selector"
 import { InfoIcon } from "@/components/info-icon"
-import type { BrandDTO } from "@/types/brand-dto"
 import { fetchBrandData } from "@/lib/data"
 
 
