@@ -16,6 +16,7 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react";
 import { UserProfileStatus } from '@prisma/client'
+import OnboardingForm from '@/components/onboarding-form'
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1)
@@ -156,42 +157,4 @@ export default function OnboardingPage() {
       </div>
     </div>
   )
-}
-
-
-export function OnboardingForm({formData}: {formData: OnboardingData}) {
-  const { update } = useSession();
-  const router = useRouter();
-  const createProfileWithFormData = createProfile.bind(null, formData)
-  const initialState = {
-    message: '',
-    success: false,
-    formData: formData 
-  }
-  const [state, formAction, isPending] = useActionState(createProfileWithFormData, initialState)
-
-  useEffect(() => {
-    const handleProfileUpdate = async () => {
-    console.log("updating session")
-    console.log("state", state)
-    console.log("isPending", isPending) 
-      if(!isPending) {
-        if (state?.success) {
-          await update({profileStatus: UserProfileStatus.COMPLETE, name: formData.profile.name})
-          console.log("redirecting to dashboard")
-          router.push('/dashboard')
-        }
-      }
-    }
-
-    handleProfileUpdate()
-
-  }, [isPending])
-
-  return (<form action={formAction}>
-              <Button type='submit' disabled={isPending}>
-                {isPending ? 'Submitting...' : 'Submit'}
-              </Button>
-          </form>
-  );
 }
