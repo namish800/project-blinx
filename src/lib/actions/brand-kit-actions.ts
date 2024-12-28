@@ -22,12 +22,11 @@ export async function updateFonts(fonts: Font[]) {
 }
 
 export async function updateTextStyleGuide(
-  isDefault: boolean,
   values: TextStyleItem[],
   tones: TextStyleItem[],
   rules: Rules
 ) {
-  await updateDatabase({ textStyleGuide: { isDefault, values, tones, rules } })
+  await updateDatabase({ textStyleGuide: { values, tones, rules } })
 }
 
 export async function updateLanguage(language: string) {

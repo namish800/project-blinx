@@ -33,7 +33,6 @@ export default async function BrandPage(props: { params: Promise<{ id: string }>
         {/* Text Style Guide */}
         <section>
           <TextStyleGuide 
-            isDefault={brandData.textStyleGuide.isDefault}
             values={brandData.textStyleGuide.values}
             tones={brandData.textStyleGuide.tones}
             rules={brandData.textStyleGuide.rules}
@@ -42,13 +41,7 @@ export default async function BrandPage(props: { params: Promise<{ id: string }>
 
         {/* Language */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-semibold text-gray-900">Language</h2>
-              <InfoIcon tooltip="Select the primary language for your brand" />
-            </div>
-            <LanguageSelector initialLanguage={brandData.language} />
-          </div>
+          <LanguageSelector initialLanguage={brandData.language} />
         </section>
       </div>
     </div>

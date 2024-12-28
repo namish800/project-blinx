@@ -16,7 +16,7 @@ interface LanguageSelectProps {
 export function LanguageSelect({ currentLanguage, onLanguageChange }: LanguageSelectProps) {
   return (
     <Select onValueChange={onLanguageChange} value={currentLanguage}>
-      <SelectTrigger className="w-[200px]">
+      <SelectTrigger className="w-full">
         <SelectValue placeholder="Select language" />
       </SelectTrigger>
       <SelectContent>

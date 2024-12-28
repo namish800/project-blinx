@@ -49,12 +49,11 @@ function Color({ hex, onDelete }: ColorProps) {
 }
 
 interface ColorPaletteProps extends ColorPaletteType {
-  onDefaultChange: (id: string, isDefault: boolean) => void
   onDeletePalette: (id: string) => void
   onUpdatePalette: (id: string, colors: string[]) => void
 }
 
-export function ColorPalette({ id, name, isDefault, colors, onDefaultChange, onDeletePalette, onUpdatePalette }: ColorPaletteProps) {
+export function ColorPalette({ id, name, colors, onDeletePalette, onUpdatePalette }: ColorPaletteProps) {
   const [newColor, setNewColor] = useState("#000000")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
@@ -85,13 +84,6 @@ export function ColorPalette({ id, name, isDefault, colors, onDefaultChange, onD
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-medium text-gray-900">{name}</h3>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Default</span>
-            <Switch 
-              checked={isDefault} 
-              onCheckedChange={(checked) => onDefaultChange(id, checked)}
-            />
-          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -100,7 +92,6 @@ export function ColorPalette({ id, name, isDefault, colors, onDefaultChange, onD
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Rename</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600" onSelect={() => onDeletePalette(id)}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

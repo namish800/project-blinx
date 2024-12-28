@@ -25,19 +25,6 @@ export function BrandStyle({
   const [colorPalettes, setColorPalettes] = useState<ColorPaletteType[]>(initialColorPalettes)
   const [logos, setLogos] = useState<Logo[]>(initialLogos)
   const [fonts, setFonts] = useState<Font[]>(initialFonts)
-  const [isDefault, setIsDefault] = useState<boolean>(false)
-
-  const handleAddPalette = async () => {
-    const newPalette: ColorPaletteType = {
-      id: Date.now().toString(),
-      name: "New Palette",
-      isDefault: false,
-      colors: ["#000000"]
-    }
-    const newPalettes = [...colorPalettes, newPalette]
-    setColorPalettes(newPalettes)
-    await updateColorPalettes(newPalettes)
-  }
 
   const handleUpdatePalette = async (id: string, updatedPalette: Partial<ColorPaletteType>) => {
     const newPalettes = colorPalettes.map(palette => 
@@ -95,19 +82,6 @@ export function BrandStyle({
             Define your brand's visual identity with colors, logos, and fonts
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Default</span>
-            <Switch 
-              checked={isDefault}
-              onCheckedChange={setIsDefault}
-            />
-          </div>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Import
-          </Button>
-        </div>
       </div>
 
       <div className="space-y-8">
@@ -118,17 +92,12 @@ export function BrandStyle({
               <h3 className="text-lg font-medium">Color Palettes</h3>
               <InfoIcon tooltip="Save multiple color palettes to easily apply while generating assets and documents" />
             </div>
-            <Button onClick={handleAddPalette} variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Palette
-            </Button>
           </div>
           <div className="space-y-6">
             {colorPalettes.map((palette) => (
               <ColorPalette
                 key={palette.id}
                 {...palette}
-                onDefaultChange={(id: string, isDefault: boolean) => handleUpdatePalette(id, { isDefault })}
                 onDeletePalette={() => handleDeletePalette(palette.id)}
                 onUpdatePalette={(id, colors) => handleUpdatePalette(id, { colors })}
               />
@@ -137,17 +106,20 @@ export function BrandStyle({
         </section>
 
         {/* Logos */}
-        <section>
-          <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-lg font-medium">Logos</h3>
-            <InfoIcon tooltip="Save multiple logos to easily apply while generating assets and documents" />
-          </div>
-          <LogoUpload 
-            logos={logos} 
-            onAddLogo={handleAddLogo}
-            onDeleteLogo={handleDeleteLogo}
-          />
-        </section>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+            <section>
+              <div className="flex items-center gap-2 mb-6">
+                <h3 className="text-lg font-medium">Logos</h3>
+                <InfoIcon tooltip="Save multiple logos to easily apply while generating assets and documents" />
+              </div>
+              <LogoUpload 
+                logos={logos} 
+                onAddLogo={handleAddLogo}
+                onDeleteLogo={handleDeleteLogo}
+              />
+            </section>
+        </div>
+
 
         {/* Fonts */}
         <section>

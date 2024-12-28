@@ -10,25 +10,22 @@ import type { TextStyleItem, Rules } from "@/types/brand-dto"
 import { updateTextStyleGuide } from "@/lib/actions/brand-kit-actions"
 
 interface TextStyleGuideProps {
-  isDefault: boolean
   values: TextStyleItem[]
   tones: TextStyleItem[]
   rules: Rules
 }
 
 export function TextStyleGuide({ 
-  isDefault: initialIsDefault, 
   values: initialValues, 
   tones: initialTones, 
   rules: initialRules,
 }: TextStyleGuideProps) {
-  const [isDefault, setIsDefault] = useState(initialIsDefault)
   const [values, setValues] = useState<TextStyleItem[]>(initialValues)
   const [tones, setTones] = useState<TextStyleItem[]>(initialTones)
   const [rules, setRules] = useState<Rules>(initialRules)
 
   const updateDatabase = async () => {
-    await updateTextStyleGuide(isDefault, values, tones, rules)
+    await updateTextStyleGuide(values, tones, rules)
   }
 
   const handleAddValue = async (item: Omit<TextStyleItem, "id">) => {
@@ -84,22 +81,6 @@ export function TextStyleGuide({
           <p className="text-gray-500">
             Share your style guide to ensure brand adherence in all your generations
           </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Default</span>
-            <Switch 
-              checked={isDefault}
-              onCheckedChange={async (checked) => {
-                setIsDefault(checked)
-                await updateDatabase()
-              }}
-            />
-          </div>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Import
-          </Button>
         </div>
       </div>
 

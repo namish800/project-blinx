@@ -1,7 +1,6 @@
 export interface ColorPalette {
   id: string;
   name: string;
-  isDefault: boolean;
   colors: string[];
 }
 
@@ -41,7 +40,6 @@ export interface BrandDTO {
     fonts: Font[];
   };
   textStyleGuide: {
-    isDefault: boolean;
     values: TextStyleItem[];
     tones: TextStyleItem[];
     rules: Rules;
