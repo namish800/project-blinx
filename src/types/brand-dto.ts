@@ -47,3 +47,9 @@ export interface BrandDTO {
   language: string;
 }
 
+
+export interface Brand {
+  id: string;
+  name: string;
+  description: string;
+}

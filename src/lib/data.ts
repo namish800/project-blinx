@@ -1,4 +1,5 @@
 import { BrandDTO } from "@/types/brand-dto";
+import type { Brand } from "@/types/brand-dto"
 
 // This function simulates fetching data from an API or database
 export async function fetchBrandData(id: string): Promise<BrandDTO> {
@@ -110,3 +111,16 @@ export async function fetchBrandData(id: string): Promise<BrandDTO> {
     language: "en"
   };
 }
+
+export async function fetchBrandKits(): Promise<Brand[]> {
+  // In a real application, this would be an API call to your backend
+  // For demonstration, we'll simulate a delay and return mock data
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  return [
+    { id: "1", name: "Acme Inc", description: "Technology solutions provider" },
+    { id: "2", name: "GlobalTech", description: "Innovative software company" },
+    { id: "3", name: "EcoSolutions", description: "Sustainable product manufacturer" },
+  ]
+}
+
