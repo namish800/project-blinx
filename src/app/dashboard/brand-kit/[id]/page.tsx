@@ -1,13 +1,23 @@
+import { Suspense } from 'react'
 import { BrandStyle } from "@/components/brand-style"
 import { TextStyleGuide } from "@/components/text-style-guide"
 import { LanguageSelector } from "@/components/language-selector"
 import { InfoIcon } from "@/components/info-icon"
 import { fetchBrandData } from "@/lib/data"
-
+import BrandKitLoading from "./loading"
 
 export default async function BrandKitPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
+
+  return (
+    <Suspense fallback={<BrandKitLoading />}>
+      <BrandContent id={id} />
+    </Suspense>
+  )
+}
+
+async function BrandContent({ id }: { id: string }) {
   const brandData = await fetchBrandData(id);
 
   return (
@@ -45,7 +55,8 @@ export default async function BrandKitPage(props: { params: Promise<{ id: string
         <section>
           <LanguageSelector 
             brandKitId={id}
-            initialLanguage={brandData.language} />
+            initialLanguage={brandData.language} 
+          />
         </section>
       </div>
     </div>
