@@ -18,6 +18,16 @@ enum UserProfileStatus {
   INCOMPLETE
   COMPLETE
 }
+
+enum StyleItemType {
+  VALUE
+  TONE
+}
+
+enum TermTypeEnum {
+  PREFERRED
+  AVOID
+}
  
 model User {
   id            String          @id @default(cuid())
@@ -30,6 +40,7 @@ model User {
   sessions      Session[]
   // Optional for WebAuthn support
   Authenticator Authenticator[]
+  usersToBrandKits UsersToBrandKits[]
 
   profileStatus UserProfileStatus @default(INCOMPLETE)
 
@@ -140,3 +151,107 @@ model Waitlist {
   createdAtDefault DateTime @default(now())
 }
 
+// ---------- BrandKit & Related Models ----------
+model BrandKit {
+  id               String             @id @default(cuid())
+  name             String
+  description      String
+
+  // Now a single color palette, optionally
+  colorPalette     ColorPalette?
+
+  logos            Logo[]
+  fonts            Font[]
+  textStyleGuide   TextStyleGuide?
+  language         String             @default("en")
+  usersToBrandKits UsersToBrandKits[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt @default(now())
+}
+
+// Many-to-many join between BrandKit and User
+model UsersToBrandKits {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+  brandKitId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, brandKitId])
+}
+
+// ---------- ColorPalette (1:1) ----------
+model ColorPalette {
+  id         String   @id @default(cuid())
+  name       String
+  colors     String[] // stored as an array of hex values
+
+  // Now each ColorPalette belongs to exactly one BrandKit
+  brandKitId String   @unique
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ---------- Others ----------
+model Logo {
+  id         String   @id @default(cuid())
+  url        String
+  brandKitId String
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Font {
+  id         String   @id @default(cuid())
+  name       String
+  usage      String
+  brandKitId String
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model TextStyleGuide {
+  id         String       @id @default(cuid())
+  styleItems StyleItem[]
+  rules      Rules?
+  brandKitId String       @unique
+  brandKit   BrandKit     @relation(fields: [brandKitId], references: [id])
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model StyleItem {
+  id               String         @id @default(cuid())
+  title            String
+  description      String
+  type             StyleItemType
+  textStyleGuideId String
+  textStyleGuide   TextStyleGuide @relation(fields: [textStyleGuideId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Rules {
+  id               String         @id @default(cuid())
+  terms            Term[]
+  textStyleGuideId String         @unique
+  textStyleGuide   TextStyleGuide @relation(fields: [textStyleGuideId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Term {
+  id        String       @id @default(cuid())
+  text      String
+  termType  TermTypeEnum?
+  rulesId   String
+  rules     Rules        @relation(fields: [rulesId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}

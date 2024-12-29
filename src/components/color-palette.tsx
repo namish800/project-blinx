@@ -21,7 +21,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
-import type { ColorPalette as ColorPaletteType } from "@/types/brand-dto"
+import type { ColorPalette } from "@/types/brand-dto"
+import { InfoIcon } from "@/components/info-icon"
 
 interface ColorProps {
   hex: string
@@ -48,18 +49,24 @@ function Color({ hex, onDelete }: ColorProps) {
   )
 }
 
-interface ColorPaletteProps extends ColorPaletteType {
-  onDeletePalette: (id: string) => void
-  onUpdatePalette: (id: string, colors: string[]) => void
+interface ColorPaletteProps {
+  onUpdatePalette: (colors: string[]) => void
+  colorPalette: ColorPalette
 }
 
-export function ColorPalette({ id, name, colors, onDeletePalette, onUpdatePalette }: ColorPaletteProps) {
+const initColorPalette: ColorPalette = {
+  id: "1",
+  name: "New Palette",
+  colors: []
+}
+
+export function ColorPalette({ colorPalette, onUpdatePalette }: ColorPaletteProps) {
   const [newColor, setNewColor] = useState("#000000")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
 
   const handleAddColor = () => {
-    if (colors.length >= 4) {
+    if (colorPalette.colors.length >= 4) {
       toast({
         title: "Color limit reached",
         description: "You can only add up to 4 colors in a palette.",
@@ -69,21 +76,26 @@ export function ColorPalette({ id, name, colors, onDeletePalette, onUpdatePalett
       return
     }
     if (newColor) {
-      onUpdatePalette(id, [...colors, newColor])
+      onUpdatePalette([...colorPalette.colors, newColor])
       setNewColor("#000000")
       setIsDialogOpen(false)
     }
   }
 
   const handleDeleteColor = (index: number) => {
-    onUpdatePalette(id, colors.filter((_, i) => i !== index))
+    onUpdatePalette(colorPalette.colors.filter((_, i) => i !== index))
   }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-medium text-gray-900">{name}</h3>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-medium">Color Palette</h3>
+              <InfoIcon tooltip="Save multiple color palettes to easily apply while generating assets and documents" />
+            </div>
+          </div>
+        <div className="flex items-center gap-4 space-y-6">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -97,14 +109,14 @@ export function ColorPalette({ id, name, colors, onDeletePalette, onUpdatePalett
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-6">
-        {colors.map((color, index) => (
+        {colorPalette?.colors.map((color, index) => (
           <Color 
             key={index} 
             hex={color} 
             onDelete={() => handleDeleteColor(index)}
           />
         ))}
-        {colors.length < 4 && (
+        {(!colorPalette || colorPalette.colors.length < 4) && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <button

@@ -1,12 +1,12 @@
 import { BrandList } from "@/components/brand-list"
 import { CreateBrandButton } from "@/components/create-brand-button"
 import { BrandsHero } from "@/components/brands-hero"
-import { fetchBrandKits } from "@/lib/data"
+import { fetchBrandKitsByUserEmail } from "@/lib/data"
 import { Suspense } from "react"
 import { BrandListSkeleton } from "@/components/brand-kits-skeleton"
 
 export default async function BrandKits() {
-  const brands = await fetchBrandKits()
+
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -11,6 +11,7 @@ export const authConfig = {
       if (token?.profileStatus) {
         session.user.profileStatus = token.profileStatus as UserProfileStatus;
       }
+      session.user.id = token.id as string;
       return session;
     },
     async jwt({ token, user, trigger, session}) {
@@ -21,6 +22,7 @@ export const authConfig = {
       }
       if (trigger=='signIn' && user) {
         token.profileStatus = user.profileStatus;
+        token.id = user.id;
       }
 
       return token;

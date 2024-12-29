@@ -4,6 +4,7 @@ import { UserProfileStatus } from '@prisma/client';
 declare module "next-auth" {
   interface User extends DefaultUser {
     profileStatus?: UserProfileStatus; // Add custom field
+    id?: string;
   }
 
   interface Session extends DefaultSession {
@@ -15,5 +16,6 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
     interface JWT {
       profileStatus?: UserProfileStatus; // Add custom field
+      id?: string
     }
   }

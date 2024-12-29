@@ -20,20 +20,23 @@ interface LogoUploadProps {
 }
 
 export function LogoUpload({ logos, onAddLogo, onDeleteLogo }: LogoUploadProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // In a real app, you would upload the file to your server here
+      // TODO: In a real app, you would upload the file to your server here
       // For demo purposes, we'll create a local URL
       const url = URL.createObjectURL(file)
       onAddLogo({ id: Date.now().toString(), url })
+      setIsDialogOpen(false)
     }
   }
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <button className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 hover:border-gray-300 transition-colors">
               <Upload className="h-6 w-6 text-gray-400" />

@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useActionState, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,53 +15,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import { createBrand, createBrandFromUrl } from "@/lib/actions/brand-kit-actions"
-import { useToast } from "@/hooks/use-toast"
+import { handleBrandSubmitAction } from "@/lib/actions/brand-kit-actions"
+
+/**
+ * Simple interface for how your brand might be shaped
+ * (only necessary if you’re using TypeScript).
+ */
+// interface Brand {
+//   id: string
+//   name: string
+//   description: string
+// }
 
 export function CreateBrandButton() {
   const [open, setOpen] = useState(false)
-  const [brandUrl, setBrandUrl] = useState('')
-  const [brandName, setBrandName] = useState('')
-  const [brandDescription, setBrandDescription] = useState('')
-  const router = useRouter()
-  const { toast } = useToast()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      if (brandUrl.trim()) {
-        await createBrandFromUrl(brandUrl)
-      } else if (brandName.trim() && brandDescription.trim()) {
-        await createBrand({ name: brandName, description: brandDescription })
-      } else {
-        toast({
-          title: "Error",
-          description: "Please enter a URL or fill in both name and description.",
-          variant: "destructive",
-        })
-        return
-      }
-      toast({
-        title: "Success",
-        description: "Brand created successfully!",
-      })
-      resetForm()
-      router.refresh()
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create brand. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
 
-  const resetForm = () => {
-    setBrandUrl('')
-    setBrandName('')
-    setBrandDescription('')
-    setOpen(false)
-  }
+  const [state, formAction, pending] = useActionState(handleBrandSubmitAction, undefined)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -70,7 +39,12 @@ export function CreateBrandButton() {
         <Button>Create New Brand Kit</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
+        {/* 
+          With server actions:
+          - `action={handleBrandSubmitAction}` calls our server function.
+          - Must have method="POST" for FormData to be properly handled.
+        */}
+        <form action={formAction} method="POST">
           <DialogHeader>
             <DialogTitle>Create New Brand Kit</DialogTitle>
             <DialogDescription>
@@ -78,15 +52,15 @@ export function CreateBrandButton() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* Brand URL Field */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="url" className="text-right">
+              <Label htmlFor="brandUrl" className="text-right">
                 URL
               </Label>
               <Input
-                id="url"
+                id="brandUrl"
+                name="brandUrl"             // <-- name needed for server action
                 type="url"
-                value={brandUrl}
-                onChange={(e) => setBrandUrl(e.target.value)}
                 className="col-span-3"
                 placeholder="https://example.com"
               />
@@ -97,35 +71,40 @@ export function CreateBrandButton() {
                 or
               </span>
             </div>
+            {/* Brand Name Field */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+              <Label htmlFor="brandName" className="text-right">
                 Name
               </Label>
               <Input
-                id="name"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
+                id="brandName"
+                name="brandName"            // <-- name needed
                 className="col-span-3"
               />
             </div>
+            {/* Brand Description Field */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
+              <Label htmlFor="brandDescription" className="text-right">
                 Description
               </Label>
               <Textarea
-                id="description"
-                value={brandDescription}
-                onChange={(e) => setBrandDescription(e.target.value)}
+                id="brandDescription"
+                name="brandDescription"     // <-- name needed
                 className="col-span-3"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Create Brand</Button>
+            {/* 
+              Using useFormStatus, we can disable the button while pending 
+              or show a different label, e.g., "Creating..."
+            */}
+            <Button type="submit" disabled={pending}>
+              {pending ? "Creating..." : "Create Brand"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   )
 }
-

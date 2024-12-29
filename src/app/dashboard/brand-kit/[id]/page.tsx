@@ -5,7 +5,7 @@ import { InfoIcon } from "@/components/info-icon"
 import { fetchBrandData } from "@/lib/data"
 
 
-export default async function BrandPage(props: { params: Promise<{ id: string }> }) {
+export default async function BrandKitPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
   const brandData = await fetchBrandData(id);
@@ -24,7 +24,8 @@ export default async function BrandPage(props: { params: Promise<{ id: string }>
         {/* Brand Style */}
         <section>
           <BrandStyle 
-            colorPalettes={brandData.brandStyle.colorPalettes}
+            brandKitId={id}
+            colorPalette={brandData.brandStyle.colorPalette}
             logos={brandData.brandStyle.logos}
             fonts={brandData.brandStyle.fonts}
           />

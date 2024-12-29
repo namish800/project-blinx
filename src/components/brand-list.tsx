@@ -1,12 +1,23 @@
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { fetchBrandKits } from "@/lib/data"
+import { fetchBrandKitsByUserEmail, fetchBrands } from "@/lib/data"
 import { Eye } from 'lucide-react'
+import { auth } from "@/auth"
+import { Brand } from '@/types/brand-dto'
+import { redirect } from 'next/navigation';
+
 
 export async function BrandList() {
-  const brands = await fetchBrandKits()
+  const session = await auth();
+  const email = session?.user?.email;
+  let brands: Brand[] = [];
 
-  return (
+  if(email){
+    brands = await fetchBrandKitsByUserEmail(email)
+  }
+
+
+  return ( 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {brands.map((brand) => (
         <Link href={`brand-kit/${brand.id}`} key={brand.id} className="no-underline">

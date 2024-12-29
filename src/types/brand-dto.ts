@@ -1,5 +1,5 @@
 export interface ColorPalette {
-  id: string;
+  id: string | undefined;
   name: string;
   colors: string[];
 }
@@ -35,7 +35,7 @@ export interface BrandDTO {
   name: string;
   description: string;
   brandStyle: {
-    colorPalettes: ColorPalette[];
+    colorPalette: ColorPalette;
     logos: Logo[];
     fonts: Font[];
   };
