@@ -12,24 +12,47 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import type { Logo } from "@/types/brand-dto"
+import { toast } from "@/hooks/use-toast"
+import { uploadLogo } from "@/lib/actions/brand-kit-actions"
 
 interface LogoUploadProps {
+  brandKitId: string
   logos: Logo[]
   onAddLogo: (logo: Logo) => void
   onDeleteLogo: (id: string) => void
 }
 
-export function LogoUpload({ logos, onAddLogo, onDeleteLogo }: LogoUploadProps) {
+export function LogoUpload({ brandKitId, logos, onAddLogo, onDeleteLogo }: LogoUploadProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // TODO: In a real app, you would upload the file to your server here
-      // For demo purposes, we'll create a local URL
-      const url = URL.createObjectURL(file)
-      onAddLogo({ id: Date.now().toString(), url })
-      setIsDialogOpen(false)
+      setIsUploading(true)
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('brandKitId', brandKitId)
+
+      try {
+        const newLogo = await uploadLogo(formData)
+        onAddLogo(newLogo)
+        toast({
+          title: "Success",
+          description: "Logo uploaded successfully",
+        })
+      } catch (error) {
+        console.error('Upload error:', error)
+        toast({
+          title: "Error",
+          description: "Failed to upload logo",
+          variant: "destructive",
+        })
+      } finally {
+        setIsUploading(false)
+        setIsDialogOpen(false)
+
+      }
     }
   }
 

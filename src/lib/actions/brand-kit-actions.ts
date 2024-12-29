@@ -7,11 +7,11 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { StyleItemType, TermTypeEnum } from "@prisma/client"
+import { put } from '@vercel/blob'
 
 
 // This is a mock function to simulate database operations
 async function updateDatabase(data: Partial<BrandDTO>): Promise<void> {
-  console.log('Updating database:', data)
   // In a real application, you would update your database here
   await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate network delay
 }
@@ -35,7 +35,6 @@ export async function updateTextStyleGuide(
   tones: TextStyleItem[],
   rules: Rules
 ) {
-  console.log("State in  action:", brandKitId, values, tones, rules)
   await updateBrandKit(brandKitId, { textStyleGuide: { values, tones, rules } })
 }
 
@@ -94,3 +93,36 @@ export async function handleBrandSubmitAction(state: void | undefined, data: For
 
 }
 
+
+export async function uploadLogo(formData: FormData) {
+  const file = formData.get('file') as File
+  const brandKitId = formData.get('brandKitId') as string
+
+  if (!file) {
+    throw new Error('No file uploaded')
+  }
+
+  const fileName = "Logo/"+ brandKitId + file.name;
+
+  const blob = await put(fileName, file, {
+    access: 'public',
+  })
+
+  const logo = await prisma.logo.create({
+    data: {
+      url: blob.url,
+      brandKitId: brandKitId,
+    },
+  })
+
+  revalidatePath('/brand')
+  return { id: logo.id, url: blob.url }
+}
+
+export async function deleteLogo(id: string) {
+  await prisma.logo.delete({
+    where: { id },
+  })
+
+  revalidatePath('/brand')
+}

@@ -95,6 +95,7 @@ export function BrandStyle({
                 <InfoIcon tooltip="Save multiple logos to easily apply while generating assets and documents" />
               </div>
               <LogoUpload 
+                brandKitId={brandKitId}
                 logos={logos} 
                 onAddLogo={handleAddLogo}
                 onDeleteLogo={handleDeleteLogo}

@@ -25,7 +25,6 @@ export function TextStyleGuide({
 
   useEffect(() => {
     const updateDatabase = async () => {
-      console.log("Updating DB with:", brandKitId, values, tones, rules)
       await updateTextStyleGuide(brandKitId, values, tones, rules)
     }
     updateDatabase()
