@@ -30,15 +30,17 @@ export async function updateFonts(brandKitId:string, fonts: Font[]) {
 }
 
 export async function updateTextStyleGuide(
+  brandKitId: string,
   values: TextStyleItem[],
   tones: TextStyleItem[],
   rules: Rules
 ) {
-  await updateDatabase({ textStyleGuide: { values, tones, rules } })
+  console.log("State in  action:", brandKitId, values, tones, rules)
+  await updateBrandKit(brandKitId, { textStyleGuide: { values, tones, rules } })
 }
 
-export async function updateLanguage(language: string) {
-  await updateDatabase({ language })
+export async function updateLanguage(brandKitId:string, language: string) {
+  await updateBrandKit(brandKitId, { language })
 }
 
 

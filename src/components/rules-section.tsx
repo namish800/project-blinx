@@ -8,7 +8,7 @@ import type { Rules, Term } from "@/types/brand-dto"
 
 interface RulesSectionProps {
   rules: Rules;
-  onUpdateRules: (newRules: Rules) => Promise<void>;
+  onUpdateRules: (newRules: Rules) => void;
 }
 
 export function RulesSection({ rules, onUpdateRules }: RulesSectionProps) {

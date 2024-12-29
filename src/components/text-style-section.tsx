@@ -33,6 +33,8 @@ export function TextStyleSection({
 }: TextStyleSectionProps) {
   const [editingItem, setEditingItem] = useState<TextStyleItem | null>(null)
   const [newItem, setNewItem] = useState<Omit<TextStyleItem, "id"> | null>(null)
+  const [isNewDialogOpen, setIsNewDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const handleSave = () => {
     if (editingItem) {
@@ -41,9 +43,11 @@ export function TextStyleSection({
         description: editingItem.description
       })
       setEditingItem(null)
+      setIsEditDialogOpen(false)
     } else if (newItem) {
       onAdd(newItem)
       setNewItem(null)
+      setIsNewDialogOpen(false)
     }
   }
 
@@ -51,9 +55,12 @@ export function TextStyleSection({
     <div className="bg-white rounded-lg shadow-sm border">
       <div className="flex items-center justify-between p-6 border-b">
         <h3 className="text-lg font-medium">{title}</h3>
-        <Dialog onOpenChange={() => setNewItem({ title: "", description: "" })}>
+        <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => {
+              setNewItem({ title: "", description: "" })
+              setIsNewDialogOpen(true)
+            }}>
               <Plus className="h-4 w-4 mr-2" />
               New
             </Button>
@@ -97,9 +104,16 @@ export function TextStyleSection({
               <p className="text-gray-500">{item.description}</p>
             </div>
             <div className="flex items-center gap-2 ml-4">
-              <Dialog onOpenChange={() => setEditingItem(item)}>
+              <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => {
+                      setEditingItem(item)
+                      setIsEditDialogOpen(true)
+                    }}
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>

@@ -6,15 +6,16 @@ import { updateLanguage } from '@/lib/actions/brand-kit-actions'
 import { InfoIcon } from '@/components/info-icon';
 
 interface LanguageSelectorProps {
+  brandKitId: string,
   initialLanguage: string;
 }
 
-export function LanguageSelector({ initialLanguage }: LanguageSelectorProps) {
+export function LanguageSelector({ brandKitId, initialLanguage }: LanguageSelectorProps) {
   const [language, setLanguage] = useState(initialLanguage);
 
   const handleLanguageChange = async (newLanguage: string) => {
     setLanguage(newLanguage);
-    await updateLanguage(newLanguage);
+    await updateLanguage(brandKitId, newLanguage);
   };
 
   return (

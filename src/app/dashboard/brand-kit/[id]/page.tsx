@@ -33,7 +33,8 @@ export default async function BrandKitPage(props: { params: Promise<{ id: string
 
         {/* Text Style Guide */}
         <section>
-          <TextStyleGuide 
+          <TextStyleGuide
+            brandKitId={id}
             values={brandData.textStyleGuide.values}
             tones={brandData.textStyleGuide.tones}
             rules={brandData.textStyleGuide.rules}
@@ -42,7 +43,9 @@ export default async function BrandKitPage(props: { params: Promise<{ id: string
 
         {/* Language */}
         <section>
-          <LanguageSelector initialLanguage={brandData.language} />
+          <LanguageSelector 
+            brandKitId={id}
+            initialLanguage={brandData.language} />
         </section>
       </div>
     </div>
