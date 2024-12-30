@@ -7,6 +7,7 @@ import {
   TextStyleItem,
   Term,
 } from "@/types/brand-dto" // Adjust import to where you keep these interfaces
+import { PersonaDTO } from "@/types/persona-dto";
 
 export async function fetchBrandData(id: string): Promise<BrandDTO> {
   // 1. Query the BrandKit by id, including related data
@@ -466,4 +467,76 @@ export async function updateBrandKit(
   })
 }
 
+
+
+
+
+// Audience data
+
+const mockPersonas: PersonaDTO[] = [
+  {
+    id: "1",
+    name: "Eco Explorer Ellie",
+    archetype: "Outdoor adventurer with an eco-conscious mindset",
+    demographics: {
+      ageRange: "25-40",
+      gender: "Female",
+      location: "Urban areas with access to outdoor trails",
+      language: "English",
+    },
+    behavioralTraits: {
+      shoppingHabits: "Prefers sustainable and affordable products",
+      engagement: "Active on Instagram and Pinterest",
+      purchaseFrequency: "Regular",
+    },
+    painPoints: ["Struggles to find durable yet sustainable options"],
+    motivators: ["Values eco-friendly certifications", "Seeks sustainable impact"],
+    suggestedTargeting: {
+      platforms: ["Facebook", "Instagram"],
+      keywords: ["eco-friendly", "sustainable hiking gear", "outdoor adventure"],
+      interests: ["Sustainability", "Hiking", "Outdoor Adventures", "Eco-friendly Products"],
+      behaviors: ["Engaged Shoppers", "Online Buyers", "Frequent Travelers"],
+    },
+    visualRepresentation: "https://example.com/avatar/eco-explorer-ellie.png",
+  },
+  {
+    id: "2",
+    name: "Tech Savvy Tom",
+    archetype: "Early adopter and gadget enthusiast",
+    demographics: {
+      ageRange: "30-45",
+      gender: "Male",
+      location: "Metropolitan areas",
+      language: "English",
+    },
+    behavioralTraits: {
+      shoppingHabits: "Researches extensively before purchasing high-end products",
+      engagement: "Active on Twitter and tech forums",
+      purchaseFrequency: "Occasional, but high-value",
+    },
+    painPoints: ["Keeping up with rapid tech advancements", "Finding reliable product reviews"],
+    motivators: ["Latest technology", "Performance and efficiency"],
+    suggestedTargeting: {
+      platforms: ["Twitter", "LinkedIn", "Google"],
+      keywords: ["cutting-edge tech", "innovative gadgets", "smart home"],
+      interests: ["Technology", "Artificial Intelligence", "Smart Home", "Gadgets"],
+      behaviors: ["Early Adopters", "Tech Enthusiasts", "High-end Shoppers"],
+    },
+    visualRepresentation: "https://example.com/avatar/tech-savvy-tom.png",
+  },
+]
+
+
+export async function fetchPersonas(): Promise<PersonaDTO[]> {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  return mockPersonas
+}
+
+export async function fetchPersonaById(id: string): Promise<PersonaDTO | null> {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  const persona = mockPersonas.find(p => p.id === id)
+  return persona || null
+}
 
