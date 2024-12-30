@@ -1,7 +1,8 @@
 import { PersonaDetails } from "@/components/persona-details"
 import { fetchPersonaById } from "@/lib/data"
 
-export default async function PersonaPage({ params }: { params: { id: string } }) {
+export default async function PersonaPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const persona = await fetchPersonaById(params.id)
 
   if (!persona) {
