@@ -5,6 +5,7 @@ export default async function PersonaPage(props: { params: Promise<{ id: string 
   const params = await props.params;
   const persona = await fetchPersonaById(params.id)
 
+  console.log("persona:", persona)
   if (!persona) {
     return <div>Persona not found</div>
   }

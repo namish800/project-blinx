@@ -7,7 +7,7 @@ import {
   TextStyleItem,
   Term,
 } from "@/types/brand-dto" // Adjust import to where you keep these interfaces
-import { PersonaDTO } from "@/types/persona-dto";
+import { BehavioralTraits, Demographics, PersonaDTO, SuggestedTargeting } from "@/types/persona-dto";
 
 export async function fetchBrandData(id: string): Promise<BrandDTO> {
   // 1. Query the BrandKit by id, including related data
@@ -533,10 +533,112 @@ export async function fetchPersonas(): Promise<PersonaDTO[]> {
   return mockPersonas
 }
 
-export async function fetchPersonaById(id: string): Promise<PersonaDTO | null> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  const persona = mockPersonas.find(p => p.id === id)
-  return persona || null
+
+/**
+ * Create a new Persona record in the database for a specific user,
+ * then revalidate the path.
+ *
+ * @param personaData - The persona object from the front-end
+ */
+export async function createPersona(userId: string, personaData: PersonaDTO) {
+  console.log("Creating persona:", personaData)
+
+  // Actually save to the DB using Prisma
+  const created = await prisma.persona.create({
+    data: {
+      userId,
+      name: personaData.name,
+      archetype: personaData.archetype,
+
+      // Store these sub-objects as JSON
+      demographics: JSON.parse(JSON.stringify(personaData.demographics)),
+      behavioralTraits: JSON.parse(JSON.stringify(personaData.behavioralTraits)),
+      suggestedTargeting: JSON.parse(JSON.stringify(personaData.suggestedTargeting)),
+
+      // Arrays of strings
+      painPoints: personaData.painPoints,
+      motivators: personaData.motivators,
+
+      // optional
+      visualRepresentation: personaData.visualRepresentation || null,
+    },
+  })
+
+  return created;
 }
 
+
+/**
+ * Fetches all PersonaDTOs for the user with the provided email.
+ * @param userEmail - The email of the user whose personas we want.
+ * @returns An array of PersonaDTOs.
+ */
+export async function fetchPersonasByUserEmail(
+  userEmail: string
+): Promise<PersonaDTO[]> {
+  // 1) Find the user by email.
+  const user = await prisma.user.findUnique({
+    where: { email: userEmail },
+  })
+
+  if (!user) {
+    throw new Error(`User with email ${userEmail} not found.`)
+  }
+
+  // 2) Fetch all personas linked to the user’s ID.
+  const personas = await prisma.persona.findMany({
+    where: { userId: user.id },
+  })
+
+  // 3) Convert the Prisma Persona records to your PersonaDTO shape.
+  const personaDTOs: PersonaDTO[] = personas.map((p) => ({
+    id: p.id,
+    name: p.name,
+    archetype: p.archetype,
+
+    demographics: p.demographics as unknown as Demographics,
+    behavioralTraits: p.behavioralTraits as unknown as BehavioralTraits,
+    suggestedTargeting: p.suggestedTargeting as unknown as SuggestedTargeting,
+
+    painPoints: p.painPoints,       // string[]
+    motivators: p.motivators,       // string[]
+    visualRepresentation: p.visualRepresentation || undefined,
+  }))
+  return personaDTOs
+}
+
+/**
+ * Fetches a Persona record by its ID and returns a PersonaDTO.
+ * @param id - The ID of the persona to retrieve.
+ * @returns PersonaDTO or throws an error if not found.
+ */
+export async function fetchPersonaById(id: string): Promise<PersonaDTO | undefined> {
+  const persona = await prisma.persona.findUnique({
+    where: { id },
+  })
+
+  if (!persona) {
+    return undefined;
+  }
+
+  // Cast or validate the JSON fields to the known interfaces
+  return {
+    id: persona.id,
+    name: persona.name,
+    archetype: persona.archetype,
+
+    // Cast your JSON fields. If you want runtime validation, use a type-guard instead.
+    demographics: persona.demographics as unknown as PersonaDTO["demographics"],
+    behavioralTraits: persona.behavioralTraits as unknown as PersonaDTO["behavioralTraits"],
+    suggestedTargeting: persona.suggestedTargeting as unknown as PersonaDTO["suggestedTargeting"],
+
+    painPoints: persona.painPoints,
+    motivators: persona.motivators,
+
+    visualRepresentation: persona.visualRepresentation || undefined,
+  }
+}
+
+export async function fetchMockPersona() {
+  return mockPersonas[0];
+}
