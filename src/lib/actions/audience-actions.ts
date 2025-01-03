@@ -6,11 +6,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createPersona, fetchMockPersona } from "@/lib/data";
 
-// export async function createPersona(personaData: { name: string; archetype: string }) {
-//     // Mock implementation
-//     console.log('Creating persona:', personaData)
-//     revalidatePath('/audience')
-//   }
   
 export async function createPersonaFromUrl(state: void | undefined, data: FormData): Promise<void | undefined> {
   const brandUrl = (data.get("brandUrl") as string) ?? ""

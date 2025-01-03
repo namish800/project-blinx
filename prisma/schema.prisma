@@ -1,17 +1,225 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
-generator client {
-  provider = "prisma-client-js"
+
+model User {
+  id               String             @id @default(cuid())
+  name             String?
+  email            String             @unique
+  emailVerified    DateTime?
+  image            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  password         String?
+  profileStatus    UserProfileStatus  @default(INCOMPLETE)
+  accounts         Account[]
+  Authenticator    Authenticator[]
+  company          Company?
+  content          Content?
+  personas         Persona[]
+  profile          Profile?
+  sessions         Session[]
+  usersToBrandKits UsersToBrandKits[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model Profile {
+  /// Primary key
+  key        String @id @default(cuid())
+  name       String
+  department String
+  role       String
+  userId     String @unique
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  /// Primary key
+  key      String @id @default(cuid())
+  size     String
+  industry String
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Content {
+  /// Primary key
+  key          String   @id @default(cuid())
+  contentTypes String[]
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Waitlist {
+  key              String   @id @default(uuid()) @db.Uuid
+  email            String   @unique
+  name             String?
+  createdAtDefault DateTime @default(now())
+}
+
+model BrandKit {
+  id               String             @id @default(cuid())
+  name             String
+  description      String
+  language         String             @default("en")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+  colorPalette     ColorPalette?
+  fonts            Font[]
+  logos            Logo[]
+  textStyleGuide   TextStyleGuide?
+  usersToBrandKits UsersToBrandKits[]
+}
+
+model UsersToBrandKits {
+  id         String   @id @default(cuid())
+  userId     String
+  brandKitId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, brandKitId])
+}
+
+model ColorPalette {
+  id         String   @id @default(cuid())
+  name       String
+  colors     String[]
+  brandKitId String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+}
+
+model Logo {
+  id         String   @id @default(cuid())
+  url        String
+  brandKitId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+}
+
+model Font {
+  id         String   @id @default(cuid())
+  name       String
+  usage      String
+  brandKitId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
+}
+
+model TextStyleGuide {
+  id         String      @id @default(cuid())
+  brandKitId String      @unique
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  rules      Rules?
+  styleItems StyleItem[]
+  brandKit   BrandKit    @relation(fields: [brandKitId], references: [id])
+}
+
+model StyleItem {
+  id               String         @id @default(cuid())
+  title            String
+  description      String
+  type             StyleItemType
+  textStyleGuideId String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  textStyleGuide   TextStyleGuide @relation(fields: [textStyleGuideId], references: [id])
+}
+
+model Rules {
+  id               String         @id @default(cuid())
+  textStyleGuideId String         @unique
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  textStyleGuide   TextStyleGuide @relation(fields: [textStyleGuideId], references: [id])
+  terms            Term[]
+}
+
+model Term {
+  id        String        @id @default(cuid())
+  text      String
+  rulesId   String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  termType  TermTypeEnum?
+  rules     Rules         @relation(fields: [rulesId], references: [id])
+}
+
+model Persona {
+  id                   String   @id @default(cuid())
+  userId               String
+  name                 String
+  archetype            String
+  demographics         Json
+  behavioralTraits     Json
+  suggestedTargeting   Json
+  painPoints           String[]
+  motivators           String[]
+  visualRepresentation String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum UserProfileStatus {
@@ -27,259 +235,4 @@ enum StyleItemType {
 enum TermTypeEnum {
   PREFERRED
   AVOID
-}
- 
-model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  password      String?
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  // Optional for WebAuthn support
-  Authenticator Authenticator[]
-  usersToBrandKits UsersToBrandKits[]
-
-  profileStatus UserProfileStatus @default(INCOMPLETE)
-
-  // 1:1 optional relationships to profile models
-  profile       Profile?
-  company       Company?
-  content       Content?
-
-  // One user can have many personas
-  personas Persona[]
-
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
- 
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  @@id([provider, providerAccountId])
-}
- 
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
- 
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
- 
-  @@id([identifier, token])
-}
- 
-// Optional for WebAuthn support
-model Authenticator {
-  credentialID         String  @unique
-  userId               String
-  providerAccountId    String
-  credentialPublicKey  String
-  counter              Int
-  credentialDeviceType String
-  credentialBackedUp   Boolean
-  transports           String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  @@id([userId, credentialID])
-}
-
-model Profile {
-  /// Primary key
-  key        String   @id @default(cuid())
-
-  name       String
-  department String
-  role       String
-
-  // 1:1 back to User
-  userId       String @unique
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Company {
-  /// Primary key
-  key       String   @id @default(cuid())
-
-  size      String
-  industry  String
-
-  // 1:1 back to User
-  userId       String @unique
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Content {
-  /// Primary key
-  key           String   @id @default(cuid())
-  contentTypes  String[]
-
-  // 1:1 back to User
-  userId       String @unique
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Waitlist {
-  key       String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  name      String?
-  createdAtDefault DateTime @default(now())
-}
-
-// ---------- BrandKit & Related Models ----------
-model BrandKit {
-  id               String             @id @default(cuid())
-  name             String
-  description      String
-
-  // Now a single color palette, optionally
-  colorPalette     ColorPalette?
-
-  logos            Logo[]
-  fonts            Font[]
-  textStyleGuide   TextStyleGuide?
-  language         String             @default("en")
-  usersToBrandKits UsersToBrandKits[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt @default(now())
-}
-
-// Many-to-many join between BrandKit and User
-model UsersToBrandKits {
-  id         String   @id @default(cuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
-  brandKitId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@unique([userId, brandKitId])
-}
-
-// ---------- ColorPalette (1:1) ----------
-model ColorPalette {
-  id         String   @id @default(cuid())
-  name       String
-  colors     String[] // stored as an array of hex values
-
-  // Now each ColorPalette belongs to exactly one BrandKit
-  brandKitId String   @unique
-  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-// ---------- Others ----------
-model Logo {
-  id         String   @id @default(cuid())
-  url        String
-  brandKitId String
-  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model Font {
-  id         String   @id @default(cuid())
-  name       String
-  usage      String
-  brandKitId String
-  brandKit   BrandKit @relation(fields: [brandKitId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model TextStyleGuide {
-  id         String       @id @default(cuid())
-  styleItems StyleItem[]
-  rules      Rules?
-  brandKitId String       @unique
-  brandKit   BrandKit     @relation(fields: [brandKitId], references: [id])
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-}
-
-model StyleItem {
-  id               String         @id @default(cuid())
-  title            String
-  description      String
-  type             StyleItemType
-  textStyleGuideId String
-  textStyleGuide   TextStyleGuide @relation(fields: [textStyleGuideId], references: [id])
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-}
-
-model Rules {
-  id               String         @id @default(cuid())
-  terms            Term[]
-  textStyleGuideId String         @unique
-  textStyleGuide   TextStyleGuide @relation(fields: [textStyleGuideId], references: [id])
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-}
-
-model Term {
-  id        String       @id @default(cuid())
-  text      String
-  termType  TermTypeEnum?
-  rulesId   String
-  rules     Rules        @relation(fields: [rulesId], references: [id])
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-}
-
-
-// ---------- Audience ----------
-model Persona {
-  id                     String   @id @default(cuid())
-  userId                 String
-  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  name                   String
-  archetype              String
-
-  // Nested objects stored as JSON
-  demographics           Json
-  behavioralTraits       Json
-  suggestedTargeting     Json
-
-  // Arrays (PostgreSQL) for painPoints & motivators
-  painPoints             String[]
-  motivators             String[]
-
-  visualRepresentation   String?
-
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
 }

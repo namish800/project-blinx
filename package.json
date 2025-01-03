@@ -7,7 +7,8 @@
     "build": "prisma generate&& next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "dev:clean": "rm -rf .next && pnpm prisma generate && pnpm dev"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",

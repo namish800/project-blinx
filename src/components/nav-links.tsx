@@ -6,6 +6,10 @@ import clsx from 'clsx';
 import { Link } from '@/components/ui/link';
 
 
+interface NavLinksProps {
+  isCollapsed: boolean
+}
+
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const hubLinks = [
@@ -21,7 +25,7 @@ const MainLinks = [
 ];
 
 
-export function HubNavLinks() {
+export function HubNavLinks({ isCollapsed }: NavLinksProps) {
   const pathname = usePathname();
   return (
     <>
@@ -30,7 +34,7 @@ export function HubNavLinks() {
         return (
             <Link variant="ghost" key={link.name} href={link.href} className="w-full justify-start gap-2">
                 <LinkIcon className="h-4 w-4" />
-                <p className="hidden md:block">{link.name}</p>
+                {!isCollapsed && <p className="hidden md:block">{link.name}</p>}
             </Link>
         );
       })}
@@ -38,7 +42,7 @@ export function HubNavLinks() {
   );
 }
 
-export function MainNavLinks() {
+export function MainNavLinks({ isCollapsed }: NavLinksProps) {
   const pathname = usePathname();
   return (
     <>
@@ -47,7 +51,7 @@ export function MainNavLinks() {
         return (
             <Link variant="ghost" key={link.name} href={link.href} className="w-full justify-start gap-2 mb-2">
                 <LinkIcon className="h-4 w-4" />
-                <p className="hidden md:block">{link.name}</p>
+                {!isCollapsed && <p className="hidden md:block">{link.name}</p>}
             </Link>
         );
       })}
