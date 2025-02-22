@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { PlayCircle } from 'lucide-react'
+import { SignUpButton } from "@/components/auth/signup-button"
 
 export function SiteHeader() {
   return (
@@ -23,12 +24,7 @@ export function SiteHeader() {
               <PlayCircle />
               Play demo
             </Button>
-            <Button 
-              size="lg"
-              className="bg-red-500 text-white hover:bg-red-600 shadow-sm"
-            >
-              Sign up
-            </Button>
+            <SignUpButton />
           </div>
         </div>
       </nav>

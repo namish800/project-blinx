@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma"
 import { OnboardingData } from "@/types/onboarding";
 import { redirect } from 'next/navigation';
 import { UserProfileStatus } from "@prisma/client";
+import bcrypt from 'bcrypt';
 
 
 const getCallbackUrl = (url: string) => {
@@ -245,4 +246,50 @@ export async function createProfile(formData: OnboardingData) {
     return { success: false, message: 'Failed to save onboarding data.' }
   }
   return { success: true , message: 'Profile created successfully'}
+}
+
+export async function register(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const name = formData.get('name') as string;
+
+  try {
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return 'User with this email already exists.';
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+      },
+    });
+
+    // Sign in the user
+    await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    return 'Something went wrong during registration.';
+  }
+
+  // Redirect outside of try-catch
+  redirect('/onboarding');
 }  
